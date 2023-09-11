@@ -59,11 +59,13 @@ def delete_chat():
 def load_messages(data: dict) -> None:
     global username
     time = datetime.now().strftime("%H:%M:%S")
-    if data is None:
+    try:
+        for msg in data[username]["messages"]:
+            message = build_message(msg, time)
+            create_msg(message, username, msg["sender"], True)
+    except Exception as e:
+            print(e)
         return
-    for msg in data[username]["messages"]:
-        message = build_message(msg, time)
-        create_msg(message, username, msg["sender"], True)
 
 def build_message(msg: Message, time: str, end = "\n") -> str:
     new_msg = msg["msg"].replace("\n", "")
