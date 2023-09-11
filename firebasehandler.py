@@ -38,7 +38,6 @@ def database_listener(event: db.Event) -> None:
         return
     data: dict = event.data
     msg: Message = list(data.values())[0][-1]  #
-    print(f"Message: {msg}")
     receiver = msg["receiver"]
     sender = msg["sender"]
     if username == receiver:
@@ -65,7 +64,7 @@ def load_messages(data: dict) -> None:
             create_msg(message, username, msg["sender"], True)
     except Exception as e:
             print(e)
-        return
+            return
 
 def build_message(msg: Message, time: str, end = "\n") -> str:
     new_msg = msg["msg"].replace("\n", "")
