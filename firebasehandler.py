@@ -59,6 +59,8 @@ def delete_chat():
 def load_messages(data: dict) -> None:
     global username
     time = datetime.now().strftime("%H:%M:%S")
+    if data is None:
+        return
     for msg in data[username]["messages"]:
         message = build_message(msg, time)
         create_msg(message, username, msg["sender"], True)
