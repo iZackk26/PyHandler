@@ -65,7 +65,7 @@ def load_messages(data: dict) -> None:
 
 def build_message(msg: Message, time: str, end = "\n") -> str:
     new_msg = msg["msg"].replace("\n", "")
-    return f'{new_msg}*{msg["sender"]}+{time};{end}'
+    return f'!{new_msg}*{msg["sender"]}+{time};{end}'
 
 
 def create_msg(msg: str, receiver: str, sender: str, build = False) -> None:
