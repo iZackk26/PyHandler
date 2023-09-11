@@ -32,8 +32,8 @@ users_ref = db.reference("Users")
 
 def database_listener(event: db.Event) -> None:
     if event.event_type != "patch":
-        # print(event.data)
         print("Loading messages...")
+        delete_chat()
         load_messages(event.data)
         return
     data: dict = event.data
@@ -47,6 +47,15 @@ def database_listener(event: db.Event) -> None:
         msg = build_message(msg, time)
         create_msg(msg, receiver, sender)
 
+def delete_chat():
+    folder = "./Chat/"
+    try:
+        if os.path.exists(folder):
+            for file in os.listdir(folder):
+                os.remove(folder + file)
+    except fileNotFoundError:
+        os.mkdir(folder)
+
 def load_messages(data: dict) -> None:
     global username
     time = datetime.now().strftime("%H:%M:%S")
@@ -54,16 +63,9 @@ def load_messages(data: dict) -> None:
         message = build_message(msg, time)
         create_msg(message, username, msg["sender"], True)
 
-
-
 def build_message(msg: Message, time: str, end = "\n") -> str:
     new_msg = msg["msg"].replace("\n", "")
     return f'{new_msg}*{msg["sender"]}+{time};{end}'
-
-
-def check_existing_file(receiver: str, sender: str, folder: str) -> bool:
-    rute = folder + f"{receiver}{sender}.txt"
-    return os.path.exists(rute)
 
 
 def create_msg(msg: str, receiver: str, sender: str, build = False) -> None:
