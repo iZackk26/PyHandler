@@ -74,18 +74,18 @@ def load_messages(data: dict) -> None:
                     adrian_hector_chat.append(msg)
                 elif msg["sender"] == "hector" and msg["receiver"] == "isaac" or msg["sender"] == "isaac" and msg["receiver"] == "hector":
                     hector_isaac_chat.append(msg)
-        create_chat_file(adrian_isaac_chat, "adrian_isaac.txt")
-        create_chat_file(hector_isaac_chat, "hector_isaac.txt")
+        create_chat_file(adrian_isaac_chat, "adrian_isaac.txt", "adrian", "isaac")
+        create_chat_file(hector_isaac_chat, "hector_isaac.txt", "hector", "isaac")
         # create_chat_file(adrian_hector_chat, "adrian_hector.txt")
     except Exception as e:
         print("No data was found!")
         return
-def create_chat_file(chat_messages: list, filename: str) -> None:
+def create_chat_file(chat_messages: list, filename: str, reciver: str, sender: str) -> None:
     print(f"Creating chat file {filename}...")
     folder = "./Chat/"
     for msg in chat_messages:
         msg = build_message(msg)
-        create_msg(msg, filename, "", build=True)
+        create_msg(msg, reciver, sender) # msg, adrian_isaac.txt, "", build=True
 
 
 def build_message(msg: Message, end="\n") -> str:
@@ -109,7 +109,7 @@ def create_msg(msg: str, receiver: str, sender: str, build=False) -> None:
             f.write(msg)
         print("Message written!")
     else:
-        with open(folder + f"{receiver}{sender}.txt", "a") as f:
+        with open(folder + filename, "a") as f:
             f.write(msg)
 
 def upload_file(file_data: dict, receiver: str) -> None:
