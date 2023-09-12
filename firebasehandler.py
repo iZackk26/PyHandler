@@ -5,7 +5,33 @@ import firebase_admin
 from firebase_functions import db_fn, https_fn  # Cloud functions for firebase SDK
 from firebase_admin import credentials, storage, db, initialize_app
 from firebase.firebase import FirebaseApplication
-from typing import TypedDict
+from typing import TypedDict, List, Optional, Callable, Any
+
+def quick_sort(datos: List, key: Optional[Callable[[Any], Any]] = None, reverse=False) -> List:
+
+  if not key:
+      def key(value):
+          return value
+
+  if len(datos) <= 1:
+      return datos
+
+  pivot = datos.pop()
+
+  mayores = []
+  menores = []
+  for elemento in datos:
+      if key(elemento) < key(pivot):
+          menores.append(elemento)
+      else:
+          mayores.append(elemento)
+  sorted_menores = quick_sort(menores, key=key, reverse=reverse)
+  sorted_mayores = quick_sort(mayores, key=key, reverse=reverse)
+
+  if reverse:
+      return sorted_mayores + [pivot] + sorted_menores
+  else:
+      return sorted_menores + [pivot] + sorted_mayores
 
 
 class Message(TypedDict):
@@ -61,7 +87,7 @@ def delete_chat():
 
 
 def load_messages(data: dict) -> None:
-    # print(data)
+    #print(data)
     adrian_isaac_chat = []
     adrian_hector_chat = []
     hector_isaac_chat = []
@@ -74,9 +100,13 @@ def load_messages(data: dict) -> None:
                     adrian_hector_chat.append(msg)
                 elif msg["sender"] == "hector" and msg["receiver"] == "isaac" or msg["sender"] == "isaac" and msg["receiver"] == "hector":
                     hector_isaac_chat.append(msg)
+        # Quick sort the messages by time
+        adrian_isaac_chat = quick_sort(adrian_isaac_chat, key=lambda x: x["time"])
+        #adrian_hector_chat = quick_sort(adrian_hector_chat, key=lambda x: x["time"])
+        hector_isaac_chat = quick_sort(hector_isaac_chat, key=lambda x: x["time"])
         create_chat_file(adrian_isaac_chat, "adrian_isaac.txt", "adrian", "isaac")
         create_chat_file(hector_isaac_chat, "hector_isaac.txt", "hector", "isaac")
-        # create_chat_file(adrian_hector_chat, "adrian_hector.txt")
+        #create_chat_file(adrian_hector_chat, "adrian_hector.txt", "adrian", "hector")
     except Exception as e:
         print("No data was found!")
         return
