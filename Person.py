@@ -4,6 +4,7 @@ class Person:
         self.receiver = receiver
         self.temporal = temporal
         self.msg = msg
+        self.time = ""
     def __str__(self):
         return (
             "Sender: "

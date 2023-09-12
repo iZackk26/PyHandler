@@ -1,7 +1,6 @@
 import os
 import json
 import main
-from datetime import datetime
 import firebase_admin
 from firebase_functions import db_fn, https_fn  # Cloud functions for firebase SDK
 from firebase_admin import credentials, storage, db, initialize_app
@@ -42,8 +41,7 @@ def database_listener(event: db.Event) -> None:
     sender = msg["sender"]
     if username == receiver:
         print(f"Message received from {sender}")
-        time = datetime.now().strftime("%H:%M:%S")
-        msg = build_message(msg, time)
+        msg = build_message(msg)
         create_msg(msg, receiver, sender)
 
 def delete_chat():
@@ -57,18 +55,23 @@ def delete_chat():
 
 def load_messages(data: dict) -> None:
     global username
-    time = datetime.now().strftime("%H:%M:%S")
     try:
-        for msg in data[username]["messages"]:
-            message = build_message(msg, time)
-            create_msg(message, username, msg["sender"], True)
+        for users in data:
+            for msg in data[users]["messages"]:
+                print(msg)
+                if msg["sender"] == username or msg["receiver"] == username:
+                    message = build_message(msg)
+                    create_msg(message, msg["receiver"], msg["sender"], True)
+        # for msg in data[username]["messages"]:
+        #     message = build_message(msg, time)
+        #     create_msg(message, username, msg["sender"], True)
     except Exception as e:
-            print(e)
-            return
+        print("No data was found!")
+        return
 
-def build_message(msg: Message, time: str, end = "\n") -> str:
+def build_message(msg: Message, end = "\n") -> str:
     new_msg = msg["msg"].replace("\n", "")
-    return f'!{new_msg}*{msg["sender"]}+{time};{end}'
+    return f'!{new_msg}*{msg["sender"]}+{msg["time"]};{end}'
 
 
 def create_msg(msg: str, receiver: str, sender: str, build = False) -> None:

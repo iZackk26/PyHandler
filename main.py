@@ -1,4 +1,5 @@
 from Person import Person
+from datetime import datetime
 import firebasehandler
 import os
 import json
@@ -86,12 +87,14 @@ def check(person: Person) -> bool:
 
 
 def write_data(person: Person) -> dict:
+    time = datetime.now().strftime("%H:%M:%S")
     filename = f"{person.sender}-Chat.json"
     info = {
         "sender": person.sender,
         "receiver": person.receiver,
         "temporal": person.temporal,
         "msg": person.msg,
+        "time": time,
     }
     # with open(filename, "w") as f:
     #     json.dump(info, f, indent=4)
