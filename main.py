@@ -38,10 +38,15 @@ class MyHandler(FileSystemEventHandler):
             self.printed_msg = False
         # Fill the instance with the data from the file
         elif filename == "data.txt":
+            print("Reading data")
             self.person = read_data(self.folder_to_track + filename, self.person)
             if not self.printed_data:
                 print(self.person)
                 self.printed_data = True
+                # Test
+                file_data = write_data(self.person)
+                firebasehandler.upload_file(file_data, self.person.receiver)
+
         elif filename == "msg.txt":
             print("Reading message")
             self.person.msg = read_msg(self.folder_to_track + filename)

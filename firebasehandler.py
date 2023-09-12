@@ -40,7 +40,11 @@ def database_listener(event: db.Event) -> None:
     msg: Message = list(data.values())[0][-1]  #
     receiver = msg["receiver"]
     sender = msg["sender"]
-    if username == receiver:
+    if username == receiver or username == sender:
+        if sender == username:
+            msg = build_message(msg, end="\n")
+            create_msg(msg, receiver, sender)
+            return
         print(f"Message received from {sender}")
         msg = build_message(msg)
         create_msg(msg, receiver, sender)
@@ -121,6 +125,8 @@ def upload_file(file_data: dict, receiver: str) -> None:
         current_data.append(file_data)
         users_ref.update({"messages": current_data})
         print("File uploaded!")
+        # Create a file in ./Chat/ with the message
+        #create_msg(file_data["msg"], receiver, sender)
     except Exception as e:
         print(e)
 
