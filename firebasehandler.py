@@ -24,7 +24,7 @@ app = initialize_app(
     },
 )
 
-username = main.name
+username = main.name.lower()
 bucket = storage.bucket()
 users_ref = db.reference("Users")
 
@@ -32,6 +32,7 @@ users_ref = db.reference("Users")
 def database_listener(event: db.Event) -> None:
     if event.event_type != "patch":
         print("Loading messages...")
+        # print(event.data)
         delete_chat()
         load_messages(event.data)
         return
@@ -44,6 +45,7 @@ def database_listener(event: db.Event) -> None:
         msg = build_message(msg)
         create_msg(msg, receiver, sender)
 
+
 def delete_chat():
     folder = "./Chat/"
     try:
@@ -53,38 +55,58 @@ def delete_chat():
     except fileNotFoundError:
         os.mkdir(folder)
 
+
 def load_messages(data: dict) -> None:
-    global username
+    # print(data)
+    adrian_isaac_chat = []
+    adrian_hector_chat = []
+    hector_isaac_chat = []
     try:
-        for users in data:
-            for msg in data[users]["messages"]:
-                print(msg)
-                if msg["sender"] == username or msg["receiver"] == username:
-                    message = build_message(msg)
-                    create_msg(message, msg["receiver"], msg["sender"], True)
-        # for msg in data[username]["messages"]:
-        #     message = build_message(msg, time)
-        #     create_msg(message, username, msg["sender"], True)
+        for user in data:
+            for msg in data[user]["messages"]:
+                if msg["sender"] == "adrian" and msg["receiver"] == "isaac" or msg["sender"] == "isaac" and msg["receiver"] == "adrian":
+                    adrian_isaac_chat.append(msg)
+                elif msg["sender"] == "adrian" and msg["receiver"] == "hector" or msg["sender"] == "hector" and msg["receiver"] == "adrian":
+                    adrian_hector_chat.append(msg)
+                elif msg["sender"] == "hector" and msg["receiver"] == "isaac" or msg["sender"] == "isaac" and msg["receiver"] == "hector":
+                    hector_isaac_chat.append(msg)
+        create_chat_file(adrian_isaac_chat, "adrian_isaac.txt")
+        create_chat_file(hector_isaac_chat, "hector_isaac.txt")
+        # create_chat_file(adrian_hector_chat, "adrian_hector.txt")
     except Exception as e:
         print("No data was found!")
         return
+def create_chat_file(chat_messages: list, filename: str) -> None:
+    print(f"Creating chat file {filename}...")
+    folder = "./Chat/"
+    for msg in chat_messages:
+        msg = build_message(msg)
+        create_msg(msg, filename, "", build=True)
 
-def build_message(msg: Message, end = "\n") -> str:
+
+def build_message(msg: Message, end="\n") -> str:
     new_msg = msg["msg"].replace("\n", "")
     return f'!{new_msg}*{msg["sender"]}+{msg["time"]};{end}'
 
 
-def create_msg(msg: str, receiver: str, sender: str, build = False) -> None:
+def create_msg(msg: str, receiver: str, sender: str, build=False) -> None:
     folder = "./Chat/"
+    # Ommit this part if you are not hardcoding the users, else, change the if statements to match your users
+    filename = ""
+    if receiver == "adrian" and sender == "isaac" or receiver == "isaac" and sender == "adrian":
+        filename = "adrian_isaac.txt"
+    elif receiver == "adrian" and sender == "hector" or receiver == "hector" and sender == "adrian":
+        filename = "adrian_hector.txt"
+    elif receiver == "hector" and sender == "isaac" or receiver == "isaac" and sender == "hector":
+        filename = "hector_isaac.txt"
     if not build:
-        with open(folder + f"{receiver}{sender}.txt", "a") as f:
+        with open(folder + filename, "a") as f:
             print("Writing message...")
             f.write(msg)
         print("Message written!")
     else:
         with open(folder + f"{receiver}{sender}.txt", "a") as f:
             f.write(msg)
-
 
 def upload_file(file_data: dict, receiver: str) -> None:
     print(f"Uploading File to {receiver}...\n")
@@ -102,6 +124,4 @@ def upload_file(file_data: dict, receiver: str) -> None:
     except Exception as e:
         print(e)
 
-
 users_ref.listen(database_listener)
-

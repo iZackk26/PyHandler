@@ -31,6 +31,7 @@ class MyHandler(FileSystemEventHandler):
             print("Uploading File...\n")
             print(self.person)
             file_data = write_data(self.person)
+            print(file_data)
             firebasehandler.upload_file(file_data, self.person.receiver)
             self.person = Person("", "", "", "")
             self.printed_data = False
@@ -54,9 +55,9 @@ def read_data(filename, person: Person) -> Person:
             data = f.read()
             elements = data.split("*")
             elements[-1] = elements[-1].strip()
-            person.sender = elements[0]
-            person.receiver = elements[1]
-            person.temporal = elements[2]
+            person.sender = elements[0].lower()
+            person.receiver = elements[1].lower()
+            person.temporal = elements[2].replace("\x00", "")
             return person
     except Exception as e:
         print(e)
@@ -66,7 +67,7 @@ def read_data(filename, person: Person) -> Person:
 def read_msg(filename) -> Person:
     try:
         with open(filename, "r") as f:
-            data = f.read()
+            data = f.read().replace("\x00", "")
             return data
     except Exception as e:
         print(e)
@@ -105,6 +106,7 @@ def write_data(person: Person) -> dict:
 
 def main():
     print("Running...")
+    name.lower()
     folder = "./Data/"
     chat = "./Chat/"
     observer = Observer()
