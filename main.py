@@ -18,6 +18,7 @@ class MyHandler(FileSystemEventHandler):
         self.printed_data = False
         self.printed_msg = False
         self.printed_cloud = False
+        self.fully_filled_msg = False
 
     # On modified Event
     def on_modified(self, event):
@@ -25,6 +26,7 @@ class MyHandler(FileSystemEventHandler):
         if event.is_directory:
             return None
         filename = os.path.basename(event.src_path)  # **File name**
+        print(filename)
 
         # Functions that check if the instance is fully filled
         if check(self.person):
@@ -44,8 +46,13 @@ class MyHandler(FileSystemEventHandler):
                 print(self.person)
                 self.printed_data = True
                 # Test
-                file_data = write_data(self.person)
-                firebasehandler.upload_file(file_data, self.person.receiver)
+                if self.fully_filled_msg:
+                    file_data = write_data(self.person)
+                    firebasehandler.upload_file(file_data, self.person.receiver)
+                    self.person = Person("", "", "", "")
+                    self.printed_data = False
+                    self.printed_msg = False
+                    self.fully_filled_msg = False
 
         elif filename == "msg.txt":
             print("Reading message")
@@ -53,6 +60,8 @@ class MyHandler(FileSystemEventHandler):
             if not self.printed_msg:
                 print(self.person.msg)
                 self.printed_msg = True
+                self.fully_filled_msg = True
+
 
 def read_data(filename, person: Person) -> Person:
     try:
