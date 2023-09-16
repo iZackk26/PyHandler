@@ -77,12 +77,29 @@ def read_data(filename, person: Person) -> Person:
         print(e)
         return None
 
+def censure_words(msg: str) -> str:
+    index = msg.find("///")
+    msg_to_analize = msg[:index]
+    word_list = msg_to_analize.split("//")
+
+    try:
+        with open("banned_words.txt", "r") as file:
+            banned_word = file.read()
+            banned_word = banned_word.split(",")
+            for word in word_list:
+                if word in banned_word:
+                    censured_word = "###///"
+                    return censured_word
+            return msg
+    except Exception as e:
+        print(e)
+        return None
 
 def read_msg(filename) -> Person:
     try:
         with open(filename, "r") as f:
             data = f.read().replace("\x00", "")
-            return data
+            return censure_words(data)
     except Exception as e:
         print(e)
         return None
